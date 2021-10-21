@@ -1,0 +1,38 @@
+#include <SimpleKalmanFilter.h>
+
+
+SimpleKalmanFilter simpleKalmanFilter(1, 1, 0.01);
+
+// Serial output refresh time
+const long SERIAL_REFRESH_TIME = 100;
+long refresh_time;
+
+void setup() {
+  Serial.begin(115200);
+}
+
+void loop() {
+
+  // read a reference value from A0 and map it from 0 to 100
+  float real_value = analogRead(A0);
+  float measured_value = real_value + random(-100,100)/10.0;
+
+  // calculate the estimated value with Kalman Filter
+  float estimated_value = simpleKalmanFilter.updateEstimate(measured_value);
+  float k_gain = simpleKalmanFilter.getKalmanGain();
+  // send to Serial output every 100ms
+  // use the Serial Ploter for a good visualization
+  if (millis() > refresh_time) {
+    Serial.print(k_gain,4);
+    Serial.print(",");
+    Serial.print(real_value,4);
+    Serial.print(",");
+    Serial.print(measured_value,4);
+    Serial.print(",");
+    Serial.print(estimated_value,4);
+    Serial.println();
+    
+    refresh_time = millis() + SERIAL_REFRESH_TIME;
+  }
+
+}
